@@ -4,6 +4,7 @@ from nltk.corpus import gutenberg
 from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 from scipy.stats import entropy
+from random import shuffle
 
 
 def main():
@@ -15,7 +16,7 @@ def main():
     # and before the first
     # then tokenizes the result
     sun = word_tokenize(sun[sun.find("CHAPTER"):sun.find("[End of")])
-    hemingway_sun = stopword_probs(sun)
+    hemingway_sun = np.asarray(stopword_probs(sun))
     ##############################
 
     ### HEMINGWAY -- THE OLD MAN AND THE SEA ###
@@ -24,7 +25,7 @@ def main():
     startindex = oldman.find("He was an old man who fished alone")
     endindex = oldman.find("The old man was dreaming about the lions")
     oldman = word_tokenize(oldman[startindex:endindex])
-    hemingway_oldman = stopword_probs(oldman)
+    hemingway_oldman = np.asarray(stopword_probs(oldman))
     ##############################
 
     ### HEMINGWAY -- AFTER THE STORM ###
@@ -33,7 +34,7 @@ def main():
     startindex = storm.find("It wasn")
     endindex = storm.find("[End o")
     storm = word_tokenize(storm[startindex:endindex])
-    hemingway_storm = stopword_probs(storm)
+    hemingway_storm = np.asarray(stopword_probs(storm))
     ##############################
 
     ### MELVILLE -- MOBY DICK ###
@@ -42,7 +43,7 @@ def main():
     startindex = white_whale.find("Supplied by a Late Consumptive Usher")
     endindex = white_whale.find("only found another orphan")
     white_whale = word_tokenize(white_whale[startindex:endindex])
-    melville_mobydick = stopword_probs(white_whale)
+    melville_mobydick = np.asarray(stopword_probs(white_whale))
     ##############################
 
     ### MELVILLE -- BARTLEBY THE SCRIVENER ###
@@ -51,7 +52,7 @@ def main():
     startindex = bartleby.find("I am a rather elderly man.")
     endindex = bartleby.find("End of Project Gutenberg")
     bartleby = word_tokenize(bartleby[startindex:endindex])
-    melville_bartleby = stopword_probs(bartleby)
+    melville_bartleby = np.asarray(stopword_probs(bartleby))
     ##############################
 
     ### MELVILLE -- PIERRE ###
@@ -60,7 +61,7 @@ def main():
     startindex = pierre.find("There are some strange summer mornings in the country")
     endindex = pierre.find("End of Project Gutenberg")
     pierre = word_tokenize(pierre[startindex:endindex])
-    melville_pierre = stopword_probs(pierre)
+    melville_pierre = np.asarray(stopword_probs(pierre))
     ##############################
 
     ### CARROLL -- ALICE IN WONDERLAND ###
@@ -69,7 +70,7 @@ def main():
     startindex = wonderland.find("Alice was beginning to get very tired of")
     endindex = wonderland.find("and the happy summer days")
     wonderland = word_tokenize(wonderland[startindex:endindex])
-    carroll_wonderland = stopword_probs(wonderland)
+    carroll_wonderland = np.asarray(stopword_probs(wonderland))
     ##############################
 
     ### CARROLL -- THROUGH THE LOOKING GLASS ###
@@ -78,7 +79,7 @@ def main():
     startindex = glass.find("One thing was certain")
     endindex = glass.find("End of the Project Gutenberg")
     glass = word_tokenize(glass[startindex:endindex])
-    carroll_glass = stopword_probs(glass)
+    carroll_glass = np.asarray(stopword_probs(glass))
     ##############################
 
     ### CARROLL -- SYLVIE AND BRUNO ###
@@ -87,7 +88,7 @@ def main():
     startindex = sylvie.find("LESS BREAD! MORE TAXES!")
     endindex = sylvie.find("End of the Project")
     sylvie = word_tokenize(sylvie[startindex:endindex])
-    carroll_sylvie = stopword_probs(sylvie)
+    carroll_sylvie = np.asarray(stopword_probs(sylvie))
     ##############################
 
     print("data loading done")
@@ -110,9 +111,9 @@ def main():
     tests = 10
 
     for index in range(tests):
-        hemingway.shuffle()
-        melville.shuffle()
-        carroll.shuffle()
+        shuffle(hemingway)
+        shuffle(melville)
+        shuffle(carroll)
 
         training = np.array([hemingway[0], hemingway[1], melville[0], melville[1], carroll[0], carroll[1]])
 
@@ -125,9 +126,12 @@ def main():
     # additionally, since KL divergence is not a symmetrical metric, we calculate each comparison twice,
     # once from old to new and once from new to old
     # for fun I might add a further calculation which does a proportion based on melville and carroll combined
-    hemingway_stop_probs = stopword_probs(sun+storm+oldman, give_proportions=True)
-    melville_stop_probs = stopword_probs(white_whale+bartleby+pierre, give_proportions=True)
-    carroll_stop_probs = stopword_probs(wonderland+glass+sylvie, give_proportions=True)
+    hemingway_stop_probs = sun+storm+oldman
+    hemingway_stop_probs = hemingway_stop_probs/hemingway_stop_probs.sum()
+    melville_stop_probs = white_whale+bartleby+pierre
+    melville_stop_probs = melville_stop_probs/melville_stop_probs.sum()
+    carroll_stop_probs = wonderland+glass+sylvie
+    carroll_stop_probs = carroll_stop_probs/carroll_stop_probs.sum()
 
     print(hemingway_stop_probs)
 
