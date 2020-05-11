@@ -102,6 +102,8 @@ def main():
     melville = [melville_mobydick, melville_bartleby, melville_pierre]
     carroll = [carroll_wonderland, carroll_glass, carroll_sylvie]
 
+
+
     # TODO: KL and proportions. calculate similarity between different author pairs
     # in order to do KL divergence, we need to redo our stopword data as proportions
     # in order to compare the authors at the author level, rather than at the level of works,
@@ -112,6 +114,8 @@ def main():
     hemingway_stop_probs = stopword_probs(sun+storm+oldman, give_proportions=True)
     melville_stop_probs = stopword_probs(white_whale+bartleby+pierre, give_proportions=True)
     carroll_stop_probs = stopword_probs(wonderland+glass+sylvie, give_proportions=True)
+
+    print(hemingway_stop_probs)
 
     hemingway_v_melville = entropy(hemingway_stop_probs, qk=melville_stop_probs)
     hemingway_v_carroll = entropy(hemingway_stop_probs, qk=carroll_stop_probs)

@@ -45,9 +45,16 @@ def stopword_probs(chapters, punctuation=False, give_proportions=False):
             stopword_counts[index] += 1
             total_stops += 1
 
+    output = stopword_counts
+
     if give_proportions:
         # now go back over and turn counts into proportions
         print(stopword_counts.sum(), total_stops)
-        stopword_counts/total_stops
 
-    return stopword_counts
+        # Laplace normalizing. there are 179 stopwords.
+        stopword_counts = stopword_counts+1
+        total_stops + 179
+
+        output = stopword_counts/total_stops
+
+    return output
