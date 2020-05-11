@@ -1,13 +1,12 @@
 import argparse
-import PyPDF2 as pdf
 from util import *
 from nltk.corpus import gutenberg
 
 
 def main():
     ### HEMINGWAY -- OUR TIMES ###
-    hemingway_url = "https://www.gutenberg.org/files/61085/61085-0.txt"
-    ourtimes = pull_gutenberg(hemingway_url)
+    ourtimes_url = "https://www.gutenberg.org/files/61085/61085-0.txt"
+    ourtimes = pull_gutenberg(ourtimes_url)
     # clears everything after the end of the final chapter (e.g. gutenberg licensing, text from back of book)
     # and before the first
     # then tokenizes the result
@@ -15,6 +14,26 @@ def main():
     print(len(ourtimes))
     hemingway_ourtimes = stopword_counts(ourtimes)
     print("hemingway_ourtimes\n", hemingway_ourtimes)
+    ##############################
+
+    ### HEMINGWAY -- THE SUN ALSO RISES ###
+    sun_url = "http://gutenberg.ca/ebooks/hemingwaye-sunalsorises/hemingwaye-sunalsorises-00-t.txt"
+    sun = pull_gutenberg(sun_url, latin1encoding=True)
+    sun = word_tokenize(sun[sun.find("CHAPTER"):sun.find("[End of")])
+    print(len(sun))
+    hemingway_sun = stopword_counts(sun)
+    print("hemingway_sun\n", hemingway_sun)
+    ##############################
+
+    ### HEMINGWAY -- THE OLD MAN AND THE SEA ###
+    oldman_url = "http://gutenberg.ca/ebooks/hemingwaye-oldmanandthesea/hemingwaye-oldmanandthesea-00-t.txt"
+    oldman = pull_gutenberg(oldman_url, latin1encoding=True)
+    startindex = oldman.find("He was an old man who fished alone")
+    endindex = oldman.find("The old man was dreaming about the lions")
+    oldman = word_tokenize(oldman[startindex:endindex])
+    print(len(oldman))
+    hemingway_oldman = stopword_counts(oldman)
+    print("hemingway_oldman\n", hemingway_oldman)
     ##############################
 
     ### MELVILLE -- MOBY DICK ###

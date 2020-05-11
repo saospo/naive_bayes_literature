@@ -5,10 +5,15 @@ from nltk.corpus import stopwords
 from collections import defaultdict
 
 
-def pull_gutenberg(url):
-    """given the url of a .txt version of a gutenberg book, pulls the length of the book into a string"""
+def pull_gutenberg(url, latin1encoding=False):
+    """given the url of a .txt version of a gutenberg book, pulls the length of the book into a string.
+        flag assumes encoding in Latin-1 rather than utf8"""
     response = request.urlopen(url)
-    raw = response.read().decode("utf8")
+
+    if latin1encoding:
+        raw = response.read().decode("latin-1")
+    else:
+        raw = response.read().decode("utf8")
 
     return raw
 
