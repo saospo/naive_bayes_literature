@@ -4,6 +4,7 @@ from nltk import word_tokenize
 from nltk.corpus import gutenberg, stopwords
 from collections import defaultdict
 
+
 def pull_gutenberg(url):
     """given the url of a .txt version of a gutenberg book, pulls the length of the book into a string"""
     response = request.urlopen(url)
