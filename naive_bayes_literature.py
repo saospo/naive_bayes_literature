@@ -1,28 +1,21 @@
 import argparse
 from util import *
 from nltk.corpus import gutenberg
+from sklearn.naive_bayes import MultinomialNB
+import numpy as np
+from scipy.stats import entropy
 
 
 def main():
-    ### HEMINGWAY -- OUR TIMES ###
-    ourtimes_url = "https://www.gutenberg.org/files/61085/61085-0.txt"
-    ourtimes = pull_gutenberg(ourtimes_url)
-    # clears everything after the end of the final chapter (e.g. gutenberg licensing, text from back of book)
-    # and before the first
-    # then tokenizes the result
-    ourtimes = word_tokenize(ourtimes[ourtimes.find("chapter 1"):ourtimes.find("Here ends _The Inquest_")])
-    print(len(ourtimes))
-    hemingway_ourtimes = stopword_counts(ourtimes)
-    print("hemingway_ourtimes\n", hemingway_ourtimes)
-    ##############################
 
     ### HEMINGWAY -- THE SUN ALSO RISES ###
     sun_url = "http://gutenberg.ca/ebooks/hemingwaye-sunalsorises/hemingwaye-sunalsorises-00-t.txt"
     sun = pull_gutenberg(sun_url, latin1encoding=True)
+    # clears everything after the end of the final chapter (e.g. gutenberg licensing, text from back of book)
+    # and before the first
+    # then tokenizes the result
     sun = word_tokenize(sun[sun.find("CHAPTER"):sun.find("[End of")])
-    print(len(sun))
-    hemingway_sun = stopword_counts(sun)
-    print("hemingway_sun\n", hemingway_sun)
+    hemingway_sun = stopword_probs(sun)
     ##############################
 
     ### HEMINGWAY -- THE OLD MAN AND THE SEA ###
@@ -31,29 +24,34 @@ def main():
     startindex = oldman.find("He was an old man who fished alone")
     endindex = oldman.find("The old man was dreaming about the lions")
     oldman = word_tokenize(oldman[startindex:endindex])
-    print(len(oldman))
-    hemingway_oldman = stopword_counts(oldman)
-    print("hemingway_oldman\n", hemingway_oldman)
+    hemingway_oldman = stopword_probs(oldman)
+    ##############################
+
+    ### HEMINGWAY -- AFTER THE STORM ###
+    storm_url = "http://gutenberg.ca/ebooks/hemingwaye-oldmanandthesea/hemingwaye-oldmanandthesea-00-t.txt"
+    storm = pull_gutenberg(storm_url, latin1encoding=True)
+    startindex = storm.find("It wasn")
+    endindex = storm.find("[End o")
+    storm = word_tokenize(storm[startindex:endindex])
+    hemingway_storm = stopword_probs(storm)
     ##############################
 
     ### MELVILLE -- MOBY DICK ###
-    white_whale = gutenberg.words("melville-moby_dick.txt")
-    print(len(white_whale))
-    # need to just .join here because white_whale ends up being a list of words
-    # if it's a string then at least word_tokenize() will work on it in stopword_counts()
-    melville_mobydick = stopword_counts(white_whale)
-    print("melville_mobydick\n", melville_mobydick)
+    white_whale_url = "https://www.gutenberg.org/files/2701/2701-0.txt"
+    white_whale = pull_gutenberg(white_whale_url)
+    startindex = white_whale.find("Supplied by a Late Consumptive Usher")
+    endindex = white_whale.find("only found another orphan")
+    white_whale = word_tokenize(white_whale[startindex:endindex])
+    melville_mobydick = stopword_probs(white_whale)
     ##############################
 
-    ### MELVILLE -- THE APPLE TREE TABLE ###
+    ### MELVILLE -- BARTLEBY THE SCRIVENER ###
     bartleby_url = "http://www.gutenberg.org/cache/epub/11231/pg11231.txt"
     bartleby = pull_gutenberg(bartleby_url)
     startindex = bartleby.find("I am a rather elderly man.")
     endindex = bartleby.find("End of Project Gutenberg")
     bartleby = word_tokenize(bartleby[startindex:endindex])
-    print(len(bartleby))
-    melville_bartleby = stopword_counts(bartleby)
-    print("melville_bartleby\n", melville_bartleby)
+    melville_bartleby = stopword_probs(bartleby)
     ##############################
 
     ### MELVILLE -- PIERRE ###
@@ -62,29 +60,74 @@ def main():
     startindex = pierre.find("There are some strange summer mornings in the country")
     endindex = pierre.find("End of Project Gutenberg")
     pierre = word_tokenize(pierre[startindex:endindex])
-    print(len(pierre))
-    melville_pierre = stopword_counts(pierre)
-    print("melville_pierre\n", melville_pierre)
+    melville_pierre = stopword_probs(pierre)
     ##############################
 
     ### CARROLL -- ALICE IN WONDERLAND ###
-    wonderland = gutenberg.words("carroll-alice.txt")
-    print(len(wonderland))
-    # need to just .join here because white_whale ends up being a list of words
-    # if it's a string then at least word_tokenize() will work on it in stopword_counts()
-    carroll_alice = stopword_counts(wonderland)
-    print("carroll_alice\n", carroll_alice)
-
+    wonderland_url = "https://www.gutenberg.org/files/11/11-0.txt"
+    wonderland = pull_gutenberg(wonderland_url)
+    startindex = wonderland.find("Alice was beginning to get very tired of")
+    endindex = wonderland.find("and the happy summer days")
+    wonderland = word_tokenize(wonderland[startindex:endindex])
+    carroll_wonderland = stopword_probs(wonderland)
     ##############################
 
-    ### MILTON -- PARADISE LOST ###
-    paradise = gutenberg.words("milton-paradise.txt")
-    print(len(paradise))
-    # need to just .join here because white_whale ends up being a list of words
-    # if it's a string then at least word_tokenize() will work on it in stopword_counts()
-    milton_paradise = stopword_counts(paradise)
-    print("milton_paradise\n", milton_paradise)
+    ### CARROLL -- THROUGH THE LOOKING GLASS ###
+    glass_url = "https://www.gutenberg.org/files/12/12-0.txt"
+    glass = pull_gutenberg(glass_url)
+    startindex = glass.find("One thing was certain")
+    endindex = glass.find("End of the Project Gutenberg")
+    glass = word_tokenize(glass[startindex:endindex])
+    carroll_glass = stopword_probs(glass)
     ##############################
+
+    ### CARROLL -- SYLVIE AND BRUNO ###
+    sylvie_url = "https://www.gutenberg.org/files/620/620-0.txt"
+    sylvie = pull_gutenberg(sylvie_url)
+    startindex = sylvie.find("LESS BREAD! MORE TAXES!")
+    endindex = sylvie.find("End of the Project")
+    sylvie = word_tokenize(sylvie[startindex:endindex])
+    carroll_sylvie = stopword_probs(sylvie)
+    ##############################
+
+    print("data loading done")
+
+    # TODO: multinomialNB: find a way to get a feature array (use .item() from moby dick to search dicts of others?)
+    # then run a TON of tests, try to figure out how it does over many iterations
+
+    # everything after this will be test, everything before will be train
+    split_index = 1
+    # lists to contain the different texts of each author
+    hemingway = [hemingway_sun, hemingway_oldman, hemingway_storm]
+    melville = [melville_mobydick, melville_bartleby, melville_pierre]
+    carroll = [carroll_wonderland, carroll_glass, carroll_sylvie]
+
+    # TODO: KL and proportions. calculate similarity between different author pairs
+    # in order to do KL divergence, we need to redo our stopword data as proportions
+    # in order to compare the authors at the author level, rather than at the level of works,
+    # all of their tokenized works included here are combined before being passed to stopword_probs()
+    # additionally, since KL divergence is not a symmetrical metric, we calculate each comparison twice,
+    # once from old to new and once from new to old
+    # for fun I might add a further calculation which does a proportion based on melville and carroll combined
+    hemingway_stop_probs = stopword_probs(sun+storm+oldman, give_proportions=True)
+    melville_stop_probs = stopword_probs(white_whale+bartleby+pierre, give_proportions=True)
+    carroll_stop_probs = stopword_probs(wonderland+glass+sylvie, give_proportions=True)
+
+    hemingway_v_melville = entropy(hemingway_stop_probs, qk=melville_stop_probs)
+    hemingway_v_carroll = entropy(hemingway_stop_probs, qk=carroll_stop_probs)
+
+    melville_v_hemingway = entropy(melville_stop_probs, qk=hemingway_stop_probs)
+    melville_v_carroll = entropy(melville_stop_probs, qk=carroll_stop_probs)
+
+    carroll_v_hemingway = entropy(carroll_stop_probs, qk=hemingway_stop_probs)
+    carroll_v_melville = entropy(carroll_stop_probs, qk=melville_stop_probs)
+
+    print("Distance of Melville's stop probs from Hemingway's:", hemingway_v_melville)
+    print("Distance of Carroll's stop probs from Hemingway's:", hemingway_v_carroll)
+    print("Distance of Hemingway's stop probs from Melville's:", melville_v_hemingway)
+    print("Distance of Carroll's stop probs from Melville's:", melville_v_carroll)
+    print("Distance of Hemingway's stop probs from Carroll's:", carroll_v_hemingway)
+    print("Distance of Melville's stop probs from Carroll's:", carroll_v_melville)
 
 
 if __name__ == "__main__":

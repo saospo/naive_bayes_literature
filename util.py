@@ -1,8 +1,8 @@
 from urllib import request
-
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from collections import defaultdict
+import numpy as np
 
 
 def pull_gutenberg(url, latin1encoding=False):
@@ -18,26 +18,36 @@ def pull_gutenberg(url, latin1encoding=False):
     return raw
 
 
-# two flags here: first adds punctuation to the stopword list
-# (i think this might have an effect! think of how much longer the sentences are in older literature --
-# might result in more semicolons and commas than something like hemingway, where it's extremely short
-# and declarative)
-# second flag determines whether the return is a list of defaultdicts going by chapter or a
-# single defaultdict of stop words for the whole work
-def stopword_counts(chapters, punctuation=False):
-    """gives counts of all stopwords in a iterable of words.
+# takes in a list of documents, 2 from each author (1 held elsewhere for test)
+# and uses these to make a sparse array of features for use in a multinomial naive bayes .fit()
+def stopword_probs(chapters, punctuation=False, give_proportions=False):
+    """gives probability of all stopwords in a iterable of words.
         can set flag to give counts of punctuation as well.
         """
-
-    stop_words = set(stopwords.words('english'))
+    # take down a list of english stopwords
+    featurelist = list(stopwords.words('english'))
+    # then make it into a dict, where index is found by the word
+    # this allows us to make only one pass through the document at hand,
+    # and get a row number quickly regardless of the stopword we are hitting
+    featuredict = {featurelist[i]: i for i in range(len(featurelist))}
 
     if punctuation:
         print("right now this does nothing, but maybe it will later\n")
 
-    stops_in_work = defaultdict(int)
+    total_stops = 0
+    stopword_counts = np.zeros(len(featurelist))
 
+    # uses the dictionary of feature words to get a quick lookup of the proper index
+    # it ain't pretty but it works
     for word in chapters:
-        if word in stop_words:
-            stops_in_work[word] += 1
+        if word in featurelist:
+            index = featuredict[word]
+            stopword_counts[index] += 1
+            total_stops += 1
 
-    return stops_in_work
+    if give_proportions:
+        # now go back over and turn counts into proportions
+        print(stopword_counts.sum(), total_stops)
+        stopword_counts/total_stops
+
+    return stopword_counts
