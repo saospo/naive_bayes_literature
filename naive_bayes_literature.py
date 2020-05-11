@@ -102,7 +102,21 @@ def main():
     melville = [melville_mobydick, melville_bartleby, melville_pierre]
     carroll = [carroll_wonderland, carroll_glass, carroll_sylvie]
 
+    # hemingway is 1, melville is 2, carroll is 3
+    # there will always be two works by each author and they will always be presented in the following order
+    authorID_array = ([1, 1, 2, 2, 3, 3])
 
+    # number of tests to run set here
+    tests = 10
+
+    for index in range(tests):
+        hemingway.shuffle()
+        melville.shuffle()
+        carroll.shuffle()
+
+        training = np.array([hemingway[0], hemingway[1], melville[0], melville[1], carroll[0], carroll[1]])
+
+        #print("\nFor trial ", index, ", multinomialNB predicts:")
 
     # TODO: KL and proportions. calculate similarity between different author pairs
     # in order to do KL divergence, we need to redo our stopword data as proportions
