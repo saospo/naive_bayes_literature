@@ -22,9 +22,7 @@ def main():
 
     hemingway_ourtimes = stopword_counts(chapters)
 
-    print(len(hemingway_ourtimes))
-
-    print(hemingway_ourtimes[0])
+    print(hemingway_ourtimes)
 
 
 if __name__ == "__main__":
