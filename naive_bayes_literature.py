@@ -151,6 +151,8 @@ def main():
     print("Distance of Hemingway's stop probs from Carroll's:", carroll_v_hemingway)
     print("Distance of Melville's stop probs from Carroll's:", carroll_v_melville)
 
+    print("making this push to git")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
